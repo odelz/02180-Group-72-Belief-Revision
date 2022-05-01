@@ -1,10 +1,12 @@
+from audioop import add
 import math
 from operator import neg
+from pickle import TRUE
 
 from entailment import entails
 from utils import associate
 
-from sympy.logic.boolalg import to_cnf, And, Or, Equivalent
+from sympy.logic.boolalg import *
 from sortedcontainers import SortedList
 
 def validate_order(x):
@@ -19,6 +21,7 @@ def validate_order(x):
 class BeliefBase:
     def __init__(self):
         self.beliefs = SortedList(key=lambda b: neg(b.order))
+        self.count = 0
 
     #Note: Call appropriate method directly
     def __remove_belief__(self, formula):
@@ -31,7 +34,7 @@ class BeliefBase:
                 self.beliefs.add(updated_belief)
         
     def add(self, formula, order):
-        formula = to_cnf(formula)
+        #formula = to_cnf(formula)
         validate_order(order)
         
         belief = Belief(formula, order)
@@ -41,7 +44,22 @@ class BeliefBase:
         return self.beliefs(0)
 
     def print_beliefs(self):
-        print(self.beliefs)
+        for x in self.beliefs:
+            print(x.formula, x.order)
+
+    def reviseAlternative(self, formula, order):
+        form = to_cnf(formula)
+        for x in self.beliefs:
+            if x.order == order:
+                self.beliefs.remove(x)
+                temp = form.__or__(x.formula)
+                temp = to_cnf(temp)
+                self.add(temp.simplify(), order)
+            else:
+                self.add(form,order)
+        if self.beliefs.__len__() == 0:
+            self.add(form,order)
+
 
 class Belief:
     def __init__(self,formula, order = None):
@@ -57,6 +75,7 @@ class Belief:
     def __represents__(self):
         return f'Belief({self.formula}, order={self.order})'
 
+    
 
 def isclose(a,b):
     """

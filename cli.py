@@ -31,10 +31,9 @@ def handle_input(bb):
         print('Enter a formula:')
         frm = input(PROMPT)
         try:
-            frm = to_cnf(frm)
             print('Select order (real number from 0 to 1):')
             order = input(PROMPT)
-            bb.add(frm, int(order))
+            bb.reviseAlternative(frm, int(order))
         except SympifyError:
             print('Invalid formula')
         except ValueError:
@@ -59,7 +58,7 @@ def handle_input(bb):
 
     elif action == 'p':
         print('--- Printing belief base ---')
-        print(bb)
+        bb.print_beliefs()
         print()
 
     elif action == 'h':
