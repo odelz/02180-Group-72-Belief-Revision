@@ -3,7 +3,8 @@ import logging
 
 from sympy import to_cnf, SympifyError
 
-from belief_base import BeliefBase
+from belief_base1 import BeliefBase
+
 
 
 PROMPT = ">>> "
@@ -11,17 +12,18 @@ PROMPT = ">>> "
 def print_help():
     print(
 f"""Available actions:
+e: Belief expansion
 r: Belief revision
-d: Calculate degree of belief
-e: Empty belief base
+c: Belief contraction
+d: Delete Belief base
 p: Print belief base
-h: Print this help dialog
 q: Quit
 """
     )
 
 
 def handle_input(bb):
+    print_help()
     print('Select action:')
     action = input(PROMPT)
     action = action.lower()
@@ -31,38 +33,51 @@ def handle_input(bb):
         print('Enter a formula:')
         frm = input(PROMPT)
         try:
-            print('Select order (real number from 0 to 1):')
+            frm = to_cnf(frm)
+            print('Select order (real number from 0 to 100):')
             order = input(PROMPT)
             bb.reviseAlternative(frm, int(order))
         except SympifyError:
             print('Invalid formula')
         except ValueError:
-            print('Order has to be a real number from 0 to 1')
+            print('Order has to be a real number from 0 to 100')
         print()
 
-    elif action == 'd':
-        print('--- Calculate degree ---')
+    elif action == 'e':
+        print('--- Expansion ---')
         print('Enter a formula:')
         frm = input(PROMPT)
         try:
             frm = to_cnf(frm)
-            print(bb.degree(frm))
+            print('Select order (real number from 0 to 100):')
+            order = input(PROMPT)
+            print(bb.expand(frm, int(order)))
+        except SympifyError:
+            print('Invalid formula')
+        except ValueError:
+            print('Order has to be a real number from 0 to 100')
+        print()
+
+    elif action == 'c':
+        print('--- Contraction ---')
+        print('Enter a formula:')
+        frm = input(PROMPT)
+        try:
+            frm = to_cnf(frm)
+            bb.contraction(frm)
         except SympifyError:
             print('Invalid formula')
         print()
 
-    elif action == 'e':
+    elif action == 'd':
         bb.clear()
-        print('--- Emptied belief base ---')
+        print('--- Deleted belief base ---')
         print()
 
     elif action == 'p':
         print('--- Printing belief base ---')
         bb.print_beliefs()
         print()
-
-    elif action == 'h':
-        print_help()
 
     elif action == 'q':
         exit()
@@ -83,5 +98,5 @@ if __name__ == '__main__':
         logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
     bb = BeliefBase()
-    print_help()
+    #print_help()
     handle_input(bb)
