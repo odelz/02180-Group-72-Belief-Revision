@@ -1,6 +1,5 @@
 import math
 from operator import neg
-from belief_base import Belief
 
 from entailment import entails
 from utils import associate
@@ -39,7 +38,10 @@ class BeliefBase:
         self.beliefs.add(belief)
 
     def find_max_order(self, formula):
-        hjk
+        return self.beliefs(0)
+
+    def print_beliefs(self):
+        print(self.beliefs)
 
 class Belief:
     def __init__(self,formula, order = None):

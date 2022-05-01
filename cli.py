@@ -34,7 +34,7 @@ def handle_input(bb):
             frm = to_cnf(frm)
             print('Select order (real number from 0 to 1):')
             order = input(PROMPT)
-            bb.revise(frm, float(order))
+            bb.add(frm, int(order))
         except SympifyError:
             print('Invalid formula')
         except ValueError:
