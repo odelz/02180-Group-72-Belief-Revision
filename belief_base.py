@@ -3,7 +3,7 @@ import math
 from operator import neg
 from pickle import TRUE
 
-from entailment import entails
+from logic_entailment import entails
 from utils import associate
 
 from sympy.logic.boolalg import *
@@ -25,20 +25,21 @@ class BeliefBase:
 
     #Note: Call appropriate method directly
     def __remove_belief__(self, formula):
-        self.beliefs.remove(formula)          
-            
-    def __modify_belief__(self, updated_belief):
-        for x in self.beliefs:
-            if x.formula == updated_belief.formula:
-                self.beliefs.remove(x)
-                self.beliefs.add(updated_belief)
+        for belief in self.beliefs:
+            if belief.formula == formula:
+                belief.order = 0          
         
-    def add(self, formula, order):
-        #formula = to_cnf(formula)
+    def expand(self, formula, order):
+        formula = to_cnf(formula)
         validate_order(order)
-        
-        belief = Belief(formula, order)
-        self.beliefs.add(belief)
+        for x in self.beliefs:
+            if x.formula == formula:
+                return "Formula already exists"
+                
+        if order > 0:
+            belief = Belief(formula, order)
+            self.beliefs.add(belief)
+            return "Formula added"
 
     def find_max_order(self, formula):
         return self.beliefs(0)
@@ -50,16 +51,24 @@ class BeliefBase:
     def reviseAlternative(self, formula, order):
         form = to_cnf(formula)
         for x in self.beliefs:
-            if x.order == order:
+            if x.formula == formula:
                 self.beliefs.remove(x)
-                temp = form.__or__(x.formula)
-                temp = to_cnf(temp)
-                self.add(temp.simplify(), order)
-            else:
-                self.add(form,order)
-        if self.beliefs.__len__() == 0:
-            self.add(form,order)
+                #temp = form.__or__(x.formula)
+                #temp = to_cnf(temp)
+                self.expand(form, order)
+                return "Revision complete"
+        return "No such formula exists"
+                
+    def contraction(self,formula):
+        for x in self.beliefs:
+            if x.formula == formula:
+                self.beliefs.remove(x)
 
+       
+
+    def clear(self):
+        self.beliefs.clear()
+    
 
 class Belief:
     def __init__(self,formula, order = None):
